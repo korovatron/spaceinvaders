@@ -1,0 +1,26 @@
+{
+  "urls": [
+    "duffAudioSprite.ogg",
+    "duffAudioSprite.m4a",
+    "duffAudioSprite.mp3",
+    "duffAudioSprite.ac3"
+  ],
+  "sprite": {
+    "duff1": [
+      0,
+      74.96598639455783
+    ],
+    "duff2": [
+      1500,
+      110.0000000000001
+    ],
+    "duff3": [
+      3000,
+      129.47845804988668
+    ],
+    "duff4": [
+      4500,
+      128.93424036281152
+    ]
+  }
+}

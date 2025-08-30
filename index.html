@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <!-- Enable standalone mode on iOS -->
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/spaceinvaders/manifest.json">
+
+  <link rel="icon" href="invaderIcon.png" sizes="any" type="image/png">
+  <link rel="apple-touch-icon" href="invaderIcon.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Space Invaders</title>
+  <meta name="description" content="A javaScript Space Invaders Clone">
+  <meta name="author" content="Neil Kendall">
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      touch-action: none;
+      /* Prevent canvas panning */
+      background: #000000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      transform-origin: top left;
+      touch-action: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!--Define HTML5 Canvas Element -->
+  <canvas id="canvas" width="561" height="260">
+    Your browser does not support the HTML5 canvas tag.
+  </canvas>
+  <script src="howler.min.js"></script>
+  <script src="Shield.js"></script>
+  <script src="Cannon.js"></script>
+  <script src="Invader.js"></script>
+  <script src="Missile.js"></script>
+  <script src="Ufo.js"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>

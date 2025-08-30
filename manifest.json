@@ -1,0 +1,17 @@
+{
+  "id": "warp-spaceinvaders",
+  "name": "Space Invaders",
+  "short_name": "Space Invaders",
+  "start_url": "/spaceinvaders/",
+  "scope": "/spaceinvaders/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/spaceinvaders/invaderIcon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
