@@ -1,7 +1,7 @@
 // sw.js
 // Change the cache name when updating to cause cache refresh on progressive web apps
 
-const CACHE_NAME = 'space-invader-cache-Aug-17-2025-20:39';
+const CACHE_NAME = 'space-invader-cache-Jan-27-2026-20:39';
 const FILES_TO_CACHE = [
   '/spaceinvaders/',
   '/spaceinvaders/index.html',
