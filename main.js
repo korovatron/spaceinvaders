@@ -1103,6 +1103,14 @@ function update(secondsPassed) {
             updateUfoExplosion();
             if (newWaveTimer < 0) {
                 currentLevel += 1;
+                // Track new wave event in Google Analytics
+                if (typeof gtag === 'function') {
+                    gtag('event', 'SPC_INV_NEW_WAVE', {
+                        'event_category': 'game_progress',
+                        'event_label': 'wave_completed',
+                        'level': currentLevel
+                    });
+                }
                 fleet.length = 0;
                 fleet = createInvaderFleet();
                 Invader.direction = "left";
