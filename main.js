@@ -3,23 +3,6 @@
 window.addEventListener('resize', resizeCanvas);
 window.addEventListener('orientationchange', resizeCanvas);
 
-// Google Analytics play event tracking (throttled to 1 per 30 seconds)
-let lastPlayEventTime = 0;
-const playEventThrottle = 30000; // 30 seconds
-
-function trackGamePlay() {
-    const now = Date.now();
-    if (now - lastPlayEventTime >= playEventThrottle) {
-        lastPlayEventTime = now;
-        if (typeof gtag === 'function') {
-            gtag('event', 'SPC_INV_PLAY', {
-                'event_category': 'engagement',
-                'event_label': 'game_interaction'
-            });
-        }
-    }
-}
-
 // Unified key state
 const keys = {
     ArrowUp: false,
@@ -50,9 +33,6 @@ function setKey(key, state) {
 // --- Keyboard ---
 document.addEventListener('keydown', e => {
     const key = e.code === 'Space' ? 'Space' : e.key;
-    if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Space') {
-        trackGamePlay();
-    }
     setKey(key, true);
 });
 document.addEventListener('keyup', e => {
@@ -62,7 +42,6 @@ document.addEventListener('keyup', e => {
 // --- Touch ---
 function handleTouchStart(e) {
     e.preventDefault();
-    trackGamePlay();
     for (let touch of e.changedTouches) {
         if (moveTouchId === null) {
             moveTouchId = touch.identifier;
@@ -1103,14 +1082,6 @@ function update(secondsPassed) {
             updateUfoExplosion();
             if (newWaveTimer < 0) {
                 currentLevel += 1;
-                // Track new wave event in Google Analytics
-                if (typeof gtag === 'function') {
-                    gtag('event', 'SPC_INV_NEW_WAVE', {
-                        'event_category': 'game_progress',
-                        'event_label': 'wave_completed',
-                        'level': currentLevel
-                    });
-                }
                 fleet.length = 0;
                 fleet = createInvaderFleet();
                 Invader.direction = "left";
