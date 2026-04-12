@@ -24,6 +24,13 @@ let isTap = false;
 let moveTouchId = null;
 let hasMovedBeyondThreshold = false;
 
+function isTitleLinkTouchEvent(e) {
+    if (!titleScreenLink || !e.target || !(e.target instanceof Element)) {
+        return false;
+    }
+    return e.target === titleScreenLink || e.target.closest('#titleScreenLink') !== null;
+}
+
 function setKey(key, state) {
     if (keys[key] !== undefined) {
         keys[key] = state;
@@ -41,6 +48,9 @@ document.addEventListener('keyup', e => {
 
 // --- Touch ---
 function handleTouchStart(e) {
+    if (isTitleLinkTouchEvent(e)) {
+        return;
+    }
     e.preventDefault();
     for (let touch of e.changedTouches) {
         if (moveTouchId === null) {
@@ -60,6 +70,9 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
+    if (isTitleLinkTouchEvent(e)) {
+        return;
+    }
     e.preventDefault();
     for (let touch of e.changedTouches) {
         if (touch.identifier === moveTouchId) {
@@ -98,6 +111,9 @@ function handleTouchMove(e) {
 }
 
 function handleTouchEnd(e) {
+    if (isTitleLinkTouchEvent(e)) {
+        return;
+    }
     e.preventDefault();
     for (let touch of e.changedTouches) {
         if (touch.identifier === moveTouchId) {
