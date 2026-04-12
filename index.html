@@ -79,6 +79,36 @@
       -webkit-touch-callout: none;
       user-select: none;
     }
+
+    .title-link {
+      position: fixed;
+      left: 0;
+      top: 0;
+      transform: translate(-50%, -50%);
+      padding: 10px 18px;
+      border: 2px solid #7CFC00;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #7CFC00;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      z-index: 20;
+      display: none;
+      transform-origin: center center;
+      white-space: nowrap;
+    }
+
+    .title-link:hover,
+    .title-link:focus-visible {
+      background: #7CFC00;
+      color: #000000;
+      outline: none;
+    }
+
   </style>
 </head>
 
@@ -94,6 +124,9 @@
   <canvas id="canvas" width="561" height="260">
     <p>This Space Invaders game requires HTML5 canvas support. Please upgrade to a modern browser to play this classic arcade game.</p>
   </canvas>
+
+  <a id="titleScreenLink" class="title-link" href="https://www.korovatron.co.uk/?utm_source=spaceinvaders&utm_medium=ingame-link&utm_campaign=title-screen" target="_blank" rel="noopener">More Games</a>
+
   <script src="howler.min.js"></script>
   <script src="Shield.js"></script>
   <script src="Cannon.js"></script>

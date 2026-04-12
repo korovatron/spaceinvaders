@@ -398,6 +398,7 @@ document.addEventListener('touchstart', function overlayTouchHandler(e) {
 
 let canvas;
 let context;
+let titleScreenLink;
 let secondsPassed = 0;
 let oldTimeStamp = 0;
 document.addEventListener("mousedown", function (e) {
@@ -460,6 +461,15 @@ function init() {
 function createCanvas() {
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
+    titleScreenLink = document.getElementById('titleScreenLink');
+
+    if (titleScreenLink) {
+        titleScreenLink.addEventListener('pointerdown', (e) => {
+            // Prevent pointer events on the link from triggering game click handlers.
+            e.stopPropagation();
+        });
+    }
+
     canvas.height = baseHeight;
     canvas.width = baseWidth;
     resizeCanvas();
@@ -797,11 +807,41 @@ let newWaveTimer = 5;
 function gameLoad() {
     gameState = 0;
     shieldsOn = true;
+    updateTitleScreenLinkVisibility();
+}
+
+function updateTitleScreenLinkLayout() {
+    if (!titleScreenLink || !canvas) {
+        return;
+    }
+
+    // Anchor HTML control to canvas-space coordinates so it tracks scaling and centering.
+    const canvasRect = canvas.getBoundingClientRect();
+    const canvasScale = canvasRect.width / baseWidth;
+    const linkX = baseWidth / 2;
+    const linkY = 885; // Just below the "tap or space to fire" title text at y=835.
+
+    titleScreenLink.style.left = `${canvasRect.left + linkX * canvasScale}px`;
+    titleScreenLink.style.top = `${canvasRect.top + linkY * canvasScale}px`;
+    titleScreenLink.style.transform = `translate(-50%, -50%) scale(${canvasScale})`;
+}
+
+function updateTitleScreenLinkVisibility() {
+    if (!titleScreenLink) {
+        return;
+    }
+    titleScreenLink.style.display = gameState === 0 ? 'inline-block' : 'none';
+
+    if (gameState === 0) {
+        updateTitleScreenLinkLayout();
+    }
 }
 // #endregion
 
 // #region update game state
 function update(secondsPassed) {
+
+    updateTitleScreenLinkVisibility();
 
     if (secondsPassed > 0.03) {
         secondsPassed = 0.03;
@@ -1467,6 +1507,8 @@ function resizeCanvas() {
     canvas.style.position = 'absolute';
     canvas.style.left = `${(windowWidth - gameWidth * scale) / 2}px`;
     canvas.style.top = `${(windowHeight - gameHeight * scale) / 2}px`;
+
+    updateTitleScreenLinkLayout();
 }
 
 function getMouseClickPosition(canvas, event) {
