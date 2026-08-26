@@ -27,6 +27,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://www.korovatron.co.uk/spaceinvaders/">
   <meta property="og:image" content="https://www.korovatron.co.uk/spaceinvaders/invaderIcon.png">
+  <meta property="og:site_name" content="Korovatron">
   
   <!-- Twitter Card tags -->
   <meta name="twitter:card" content="summary">
@@ -40,17 +41,54 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "Game",
-    "name": "Space Invaders",
-    "description": "Classic Space Invaders arcade game playable online for free. Defend Earth from alien invasion in this retro-style JavaScript game with authentic sound effects.",
-    "url": "https://www.korovatron.co.uk/spaceinvaders/",
-    "author": {
-      "@type": "Person",
-      "name": "Neil Kendall"
-    },
-    "gamePlatform": "Web Browser",
-    "genre": "Arcade",
-    "applicationCategory": "Game"
+    "@graph": [
+        {
+            "@type": "BreadcrumbList",
+            "@id": "https://www.korovatron.co.uk/spaceinvaders/#breadcrumb",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Korovatron",
+                    "item": "https://www.korovatron.co.uk/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Space Invaders",
+                    "item": "https://www.korovatron.co.uk/spaceinvaders/"
+                }
+            ]
+        },
+        {
+            "@type": "Game",
+            "@id": "https://www.korovatron.co.uk/spaceinvaders/#game",
+            "name": "Space Invaders",
+            "description": "Classic Space Invaders arcade game playable online for free. Defend Earth from alien invasion in this retro-style JavaScript game with authentic sound effects.",
+            "url": "https://www.korovatron.co.uk/spaceinvaders/",
+            "author": {
+                "@type": "Person",
+                "name": "Neil Kendall",
+                "url": "https://www.korovatron.co.uk"
+            },
+            "publisher": {
+                "@id": "https://www.korovatron.co.uk/#organization"
+            },
+            "gamePlatform": "Web Browser",
+            "genre": "Arcade",
+            "applicationCategory": "Game",
+            "isAccessibleForFree": true,
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "GBP"
+            },
+            "image": "https://www.korovatron.co.uk/spaceinvaders/invaderIcon.png",
+            "breadcrumb": {
+                "@id": "https://www.korovatron.co.uk/spaceinvaders/#breadcrumb"
+            }
+        }
+    ]
   }
   </script>
 
