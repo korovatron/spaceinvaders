@@ -1138,6 +1138,13 @@ function update(secondsPassed) {
             updateUfoExplosion();
             if (newWaveTimer < 0) {
                 currentLevel += 1;
+                if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+                    window.goatcounter.count({
+                        path: 'space-invaders-level-' + currentLevel + '-started',
+                        title: 'Space Invaders Level ' + currentLevel + ' started',
+                        event: true
+                    });
+                }
                 fleet.length = 0;
                 fleet = createInvaderFleet();
                 Invader.direction = "left";
