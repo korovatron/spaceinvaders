@@ -1139,9 +1139,15 @@ function update(secondsPassed) {
             if (newWaveTimer < 0) {
                 currentLevel += 1;
                 if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+                    let levelLabel;
+                    if (currentLevel < 5) levelLabel = 'Level 2-4 started';
+                    else if (currentLevel < 10) levelLabel = 'Level 5 to 9 started';
+                    else if (currentLevel < 15) levelLabel = 'Level 10-14 started';
+                    else if (currentLevel < 18) levelLabel = 'Level 15-17 started';
+                    else levelLabel = 'Level 18+ started';
                     window.goatcounter.count({
-                        path: 'space-invaders-level-' + currentLevel + '-started',
-                        title: 'Space Invaders Level ' + currentLevel + ' started',
+                        path: 'space-invaders-' + levelLabel.toLowerCase().replace(/ /g, '-'),
+                        title: 'Space Invaders ' + levelLabel,
                         event: true
                     });
                 }
