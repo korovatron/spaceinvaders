@@ -173,9 +173,13 @@ document.addEventListener('gesturestart', e => e.preventDefault(), { passive: fa
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
+        // updateViaCache: 'none' stops the browser reusing an HTTP-cached copy of sw.js on
+        // normal reloads (observed in Edge), which was preventing it from noticing updates
+        // without a hard refresh. This forces a fresh network check every time.
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
             .then(reg => {
                 console.log('Service Worker registered:', reg);
+                reg.update();
             })
             .catch(err => {
                 console.error('Service Worker registration failed:', err);
