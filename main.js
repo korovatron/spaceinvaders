@@ -1364,7 +1364,6 @@ function draw() {
                 8
             );
 
-            context.drawImage(invaderLogo, 0, 0, 888, 390, baseWidth / 2 - 218 / 2, 16, 218, 96);
             drawLivesScoreLevel();
             break;
 
@@ -1413,7 +1412,6 @@ function draw() {
                 8
             );
 
-            context.drawImage(invaderLogo, 0, 0, 888, 390, baseWidth / 2 - 218 / 2, 16, 218, 96);
             drawLivesScoreLevel();
             context.font = "bold 50px Courier New";
             const opacity = getOpacity(newWaveTimer); // currentTimerValue goes from 5 to 0
@@ -1468,7 +1466,6 @@ function draw() {
                 8
             );
 
-            context.drawImage(invaderLogo, 0, 0, 888, 390, baseWidth / 2 - 218 / 2, 16, 218, 96);
             drawLivesScoreLevel();
             break;
 
@@ -1508,7 +1505,6 @@ function draw() {
                 8
             );
 
-            context.drawImage(invaderLogo, 0, 0, 888, 390, baseWidth / 2 - 218 / 2, 16, 218, 96);
             drawLivesScoreLevel();
 
             if (gameOverDisplay == true) {
@@ -1882,7 +1878,24 @@ function maybeDropInvaderMissile(invaders, invaderMissiles, currentTime, level) 
     lastMissileTime = currentTime;
 }
 
+function drawTopScore() {
+    const top = leaderboardEntries[0];
+    if (!top) {
+        context.drawImage(invaderLogo, 0, 0, 888, 390, baseWidth / 2 - 218 / 2, 16, 218, 96);
+        return;
+    }
+    // Once the player passes the leader, show their live score instead
+    const beaten = score > top.score;
+    context.font = "bold 22px Courier New";
+    context.fillStyle = "yellow";
+    drawCentredText(context, "TOP: " + (beaten ? "YOU" : top.name), 52);
+    context.font = "bold 40px Courier New";
+    context.fillStyle = "white";
+    drawCentredText(context, String(beaten ? score : top.score), 96);
+}
+
 function drawLivesScoreLevel() {
+    drawTopScore();
     context.font = "bold 50px Courier New";
     context.fillStyle = "white";
     context.fillText("SCORE " + score, 16, 80);
