@@ -672,6 +672,7 @@ let gameOverDisplay = false;
 let finalScore = 0;
 let finalWave = 1;
 let nameEntryPending = false;
+let potentialLeaderboardEntryTracked = false; // only fire the goatcounter event once per game over
 let mouseY = 0;
 let mute = false;
 let gameState;
@@ -1618,6 +1619,7 @@ function newGame() {
     currentLevel = 1;
     titleAnimateTimer = 0;
     ufoTimer = Math.floor(Math.random() * 11) + 20;
+    potentialLeaderboardEntryTracked = false;
 }
 
 function createPerSpriteIdlePlayer(howlInstance) {
@@ -1946,13 +1948,31 @@ function enterGameOver() {
     finalScore = score;
     finalWave = currentLevel;
     nameEntryPending = leaderboardQualifies(finalScore);
+    trackPotentialLeaderboardEntry();
 
     // Re-check against fresh data, since other players may have posted scores since the last read
     if (window.leaderboardService && finalScore > 0) {
         loadLeaderboard().then(refreshed => {
             if (refreshed && gameState === 2) {
                 nameEntryPending = leaderboardQualifies(finalScore);
+                trackPotentialLeaderboardEntry();
             }
+        });
+    }
+}
+
+// Fires once per game over, as soon as the score qualifies for the leaderboard -
+// counts the opportunity even if the player skips entering their name.
+function trackPotentialLeaderboardEntry() {
+    if (!nameEntryPending || potentialLeaderboardEntryTracked) {
+        return;
+    }
+    potentialLeaderboardEntryTracked = true;
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+        window.goatcounter.count({
+            path: 'space-invaders-potential-leaderboard-addition',
+            title: 'Space Invaders Potential Leaderboard Addition',
+            event: true
         });
     }
 }
