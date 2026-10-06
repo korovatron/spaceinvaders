@@ -2,7 +2,7 @@
 
 const LEADERBOARD_SIZE = 50;
 const LEADERBOARD_ROWS_PER_PAGE = 8;
-const TITLE_TABLE_SECONDS = 8; // how long the score advance table shows
+const TITLE_TABLE_SECONDS = 5; // how long the score advance table shows
 const LEADERBOARD_PAGE_SECONDS = 8; // how long each leaderboard page shows
 const TITLE_FADE_SECONDS = 0.35;
 const LEADERBOARD_NAME_LENGTH = 10;
