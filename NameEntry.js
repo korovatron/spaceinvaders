@@ -118,7 +118,7 @@ function submitName() {
     setNameEntryMessage('SAVING...');
     submitLeaderboardEntry(name, nameEntry.score, nameEntry.wave)
         .then(() => {
-            const index = insertLeaderboardEntryLocally({ name, score: nameEntry.score, wave: nameEntry.wave });
+            const index = insertLeaderboardEntryLocally({ name, score: nameEntry.score, wave: nameEntry.wave, createdAt: new Date() });
             setNameEntryMessage('SCORE SAVED!', '#7CFC00');
             setTimeout(() => {
                 if (gameState === 3) {

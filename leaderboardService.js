@@ -25,8 +25,9 @@ try {
         async fetchTop(count) {
             const snapshot = await getDocs(query(scores, orderBy("score", "desc"), limit(count)));
             return snapshot.docs.map(doc => {
-                const { name, score, wave } = doc.data();
-                return { name, score, wave };
+                const { name, score, wave, createdAt } = doc.data();
+                // createdAt can be null for an instant after submit, before the server timestamp resolves
+                return { name, score, wave, createdAt: createdAt ? createdAt.toDate() : null };
             });
         },
         async submit({ name, score, wave }) {

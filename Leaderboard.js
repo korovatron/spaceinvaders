@@ -6,6 +6,7 @@ const TITLE_TABLE_SECONDS = 8; // how long the score advance table shows
 const LEADERBOARD_PAGE_SECONDS = 3.5; // how long each leaderboard page shows
 const TITLE_FADE_SECONDS = 0.35;
 const LEADERBOARD_NAME_LENGTH = 10;
+const LEADERBOARD_DATE_LENGTH = 10;
 const LEADERBOARD_TIMEOUT_MS = 8000;
 
 let leaderboardEntries = [];
@@ -43,7 +44,12 @@ function loadLeaderboard() {
                 .then(entries => {
                     leaderboardEntries = entries
                         .filter(e => typeof e.name === 'string' && Number.isFinite(e.score) && Number.isFinite(e.wave))
-                        .map(e => ({ name: cleanNameForDisplay(e.name), score: e.score, wave: e.wave }));
+                        .map(e => ({
+                            name: cleanNameForDisplay(e.name),
+                            score: e.score,
+                            wave: e.wave,
+                            createdAt: e.createdAt instanceof Date ? e.createdAt : null
+                        }));
                     leaderboardLoaded = true;
                     resolve(true);
                 })
@@ -145,11 +151,20 @@ function titleViewAlpha() {
     return Math.max(0, Math.min(fadeIn, fadeOut));
 }
 
-function formatLeaderboardRow(rank, name, wave, score) {
+// Short numeric date in the visitor's own locale order (e.g. 10/06/26 or 06/10/26)
+function formatLeaderboardDate(date) {
+    if (!(date instanceof Date) || isNaN(date)) {
+        return '';
+    }
+    return date.toLocaleDateString(navigator.language, { year: '2-digit', month: '2-digit', day: '2-digit' });
+}
+
+function formatLeaderboardRow(rank, name, wave, score, date) {
     return String(rank).padStart(2) + "  " +
         name.padEnd(LEADERBOARD_NAME_LENGTH) + "  " +
         String(wave).padStart(4) + "  " +
-        String(score).padStart(6);
+        String(score).padStart(6) + "  " +
+        String(date).padStart(LEADERBOARD_DATE_LENGTH);
 }
 
 function drawLeaderboardPage(ctx) {
@@ -158,7 +173,7 @@ function drawLeaderboardPage(ctx) {
     drawCentredText(ctx, "TOP " + LEADERBOARD_SIZE + " PLAYERS", 300);
 
     ctx.fillStyle = "#888888";
-    drawCentredText(ctx, formatLeaderboardRow("RK", "NAME", "WAVE", "SCORE"), 350);
+    drawCentredText(ctx, formatLeaderboardRow("RK", "NAME", "WAVE", "SCORE", "DATE"), 350);
 
     const first = titleView.page * LEADERBOARD_ROWS_PER_PAGE;
     const pageEntries = leaderboardEntries.slice(first, first + LEADERBOARD_ROWS_PER_PAGE);
@@ -167,6 +182,6 @@ function drawLeaderboardPage(ctx) {
         const isMine = highlightedEntry !== null && entry.name === highlightedEntry.name &&
             entry.score === highlightedEntry.score && entry.wave === highlightedEntry.wave;
         ctx.fillStyle = isMine ? "#7CFC00" : (rank <= 3 ? "yellow" : "white");
-        drawCentredText(ctx, formatLeaderboardRow(rank, entry.name, entry.wave, entry.score), 395 + i * 31);
+        drawCentredText(ctx, formatLeaderboardRow(rank, entry.name, entry.wave, entry.score, formatLeaderboardDate(entry.createdAt)), 395 + i * 31);
     });
 }
