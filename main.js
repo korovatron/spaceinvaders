@@ -1048,7 +1048,7 @@ function update(secondsPassed) {
                     if (activeMissile) {
                         activeMissile = null;
                     }
-                    continue;
+                    break; // invaderMissiles was just emptied above, so stop iterating instead of reading stale indices
                 }
             }
             updateUfoExplosion();
@@ -1146,7 +1146,7 @@ function update(secondsPassed) {
                     if (activeMissile) {
                         activeMissile = null;
                     }
-                    continue;
+                    break; // invaderMissiles was just emptied above, so stop iterating instead of reading stale indices
                 }
             }
             updateUfoExplosion();
@@ -1862,8 +1862,8 @@ function getBottomInvaders(invaders) {
     return Array.from(bottomMap.values());
 }
 
-function tryDropInvaderMissile(invaders, invaderMissiles) {
-    if (invaderMissiles.length >= 4) return;
+function tryDropInvaderMissile(invaders, invaderMissiles, maxMissiles = 4) {
+    if (invaderMissiles.length >= maxMissiles) return;
 
     const bottomInvaders = getBottomInvaders(invaders);
     const shooter = bottomInvaders[Math.floor(Math.random() * bottomInvaders.length)];
@@ -1872,15 +1872,25 @@ function tryDropInvaderMissile(invaders, invaderMissiles) {
 }
 
 function maybeDropInvaderMissile(invaders, invaderMissiles, currentTime, level) {
-    const maxMissiles = 4;
-    const cooldown = Math.max(1000 - level * 100, 300); // faster drops at higher levels
-    const dropChance = Math.min(0.01 + level * 0.005, 0.1); // higher chance at higher levels
+    let maxMissiles = 4;
+    let cooldown = Math.max(1000 - level * 100, 300); // faster drops at higher levels, floor reached at level 7
+    let dropChance = Math.min(0.01 + level * 0.005, 0.1); // higher chance at higher levels, cap reached at level 18
+
+    // Beyond level 18 the base formulas above are fully saturated, so difficulty would
+    // otherwise plateau forever. Layer on a slow, hard-capped extra ramp past that point
+    // without altering behaviour for level 18 and below.
+    if (level > 18) {
+        const levelsPastCap = level - 18;
+        maxMissiles = Math.min(4 + Math.floor(levelsPastCap / 5), 6); // +1 at level 24, +1 at level 29, capped at 6
+        dropChance = Math.min(0.1 + levelsPastCap * 0.002, 0.16); // creeps toward 0.16 by level 48
+        cooldown = Math.max(300 - levelsPastCap * 5, 200); // creeps toward 200ms by level 38
+    }
 
     if (invaderMissiles.length >= maxMissiles) return;
     if (currentTime - lastMissileTime < cooldown) return;
     if (Math.random() > dropChance) return;
 
-    tryDropInvaderMissile(invaders, invaderMissiles);
+    tryDropInvaderMissile(invaders, invaderMissiles, maxMissiles);
     lastMissileTime = currentTime;
 }
 
