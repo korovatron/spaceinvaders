@@ -11,7 +11,8 @@ const LEADERBOARD_TIMEOUT_MS = 8000;
 let leaderboardEntries = [];
 let leaderboardLoaded = false;
 let highlightedEntry = null; // the player's most recent entry, shown in green
-const titleView = { mode: 'table', page: 0, timer: 0 };
+const titleView = { mode: 'leaderboard', page: 0, timer: 0 };
+let titleViewDataSeen = false; // tracks whether leaderboard data was available the last time we checked
 
 // Firestore calls can hang forever when offline, so never wait on them without a limit
 function withTimeout(promise, ms) {
@@ -92,15 +93,28 @@ function leaderboardPageCount() {
 }
 
 function resetTitleView() {
-    titleView.mode = 'table';
+    titleView.mode = 'leaderboard';
     titleView.page = 0;
     titleView.timer = 0;
+    titleViewDataSeen = leaderboardEntries.length > 0;
 }
 
 function updateTitleView(secondsPassed) {
     if (leaderboardEntries.length === 0) {
-        resetTitleView();
+        // Nothing to page through yet, so fall back to the score advance table.
+        titleView.mode = 'table';
+        titleView.page = 0;
+        titleView.timer = 0;
+        titleViewDataSeen = false;
         return;
+    }
+
+    if (!titleViewDataSeen) {
+        // Leaderboard data just became available - show it first before the score advance table.
+        titleViewDataSeen = true;
+        titleView.mode = 'leaderboard';
+        titleView.page = 0;
+        titleView.timer = 0;
     }
 
     titleView.timer += secondsPassed;
