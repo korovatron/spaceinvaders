@@ -145,6 +145,70 @@
       outline: none;
     }
 
+    .name-entry {
+      position: fixed;
+      left: 0;
+      top: 0;
+      transform: translate(-50%, -50%);
+      transform-origin: center center;
+      z-index: 20;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    .name-entry input {
+      box-sizing: border-box;
+      width: 400px;
+      padding: 8px 12px;
+      border: 3px solid yellow;
+      border-radius: 0;
+      background: #000000;
+      color: yellow;
+      font-family: inherit;
+      font-size: 40px;
+      font-weight: bold;
+      letter-spacing: 0.1em;
+      text-align: center;
+      text-transform: uppercase;
+      outline: none;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .name-entry-buttons {
+      display: flex;
+      gap: 24px;
+    }
+
+    .name-entry button {
+      padding: 10px 24px;
+      border: 2px solid #7CFC00;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #7CFC00;
+      font-family: inherit;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    .name-entry button:hover,
+    .name-entry button:focus-visible {
+      background: #7CFC00;
+      color: #000000;
+      outline: none;
+    }
+
+    .name-entry button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
   </style>
 </head>
 
@@ -163,13 +227,25 @@
 
   <a id="titleScreenLink" class="title-link" href="https://www.korovatron.co.uk/" target="_blank" rel="noopener">More Games</a>
 
+  <div id="nameEntry" class="name-entry">
+    <input id="nameInput" type="text" maxlength="10" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="done" aria-label="Your name">
+    <div class="name-entry-buttons">
+      <button id="nameSubmit" type="button">Submit</button>
+      <button id="nameSkip" type="button">Skip</button>
+    </div>
+  </div>
+
   <script src="howler.min.js"></script>
   <script src="Shield.js"></script>
   <script src="Cannon.js"></script>
   <script src="Invader.js"></script>
   <script src="Missile.js"></script>
   <script src="Ufo.js"></script>
+  <script src="ProfanityFilter.js"></script>
+  <script src="Leaderboard.js"></script>
+  <script src="NameEntry.js"></script>
   <script src="main.js"></script>
+  <script type="module" src="leaderboardService.js"></script>
 </body>
 
 </html>

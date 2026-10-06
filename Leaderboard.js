@@ -1,0 +1,158 @@
+// Leaderboard data (Firestore via leaderboardService.js) and title screen paging.
+
+const LEADERBOARD_SIZE = 50;
+const LEADERBOARD_ROWS_PER_PAGE = 8;
+const TITLE_TABLE_SECONDS = 8; // how long the score advance table shows
+const LEADERBOARD_PAGE_SECONDS = 3.5; // how long each leaderboard page shows
+const TITLE_FADE_SECONDS = 0.35;
+const LEADERBOARD_NAME_LENGTH = 10;
+const LEADERBOARD_TIMEOUT_MS = 8000;
+
+let leaderboardEntries = [];
+let leaderboardLoaded = false;
+let highlightedEntry = null; // the player's most recent entry, shown in green
+const titleView = { mode: 'table', page: 0, timer: 0 };
+
+// Firestore calls can hang forever when offline, so never wait on them without a limit
+function withTimeout(promise, ms) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms))
+    ]);
+}
+
+function whenLeaderboardServiceReady(callback) {
+    if (window.leaderboardReady) {
+        callback();
+    } else {
+        window.addEventListener('leaderboard-ready', callback, { once: true });
+    }
+}
+
+// Resolves true if the list was refreshed from the database
+function loadLeaderboard() {
+    return new Promise(resolve => {
+        whenLeaderboardServiceReady(() => {
+            const service = window.leaderboardService;
+            if (!service) {
+                resolve(false);
+                return;
+            }
+            withTimeout(service.fetchTop(LEADERBOARD_SIZE), LEADERBOARD_TIMEOUT_MS)
+                .then(entries => {
+                    leaderboardEntries = entries
+                        .filter(e => typeof e.name === 'string' && Number.isFinite(e.score) && Number.isFinite(e.wave))
+                        .map(e => ({ name: cleanNameForDisplay(e.name), score: e.score, wave: e.wave }));
+                    leaderboardLoaded = true;
+                    resolve(true);
+                })
+                .catch(err => {
+                    console.warn('Could not load leaderboard:', err);
+                    resolve(false);
+                });
+        });
+    });
+}
+
+function leaderboardQualifies(score) {
+    if (!window.leaderboardService || !leaderboardLoaded || score <= 0) {
+        return false;
+    }
+    return leaderboardEntries.length < LEADERBOARD_SIZE ||
+        score > leaderboardEntries[leaderboardEntries.length - 1].score;
+}
+
+// Ties rank below existing entries with the same score
+function leaderboardRankFor(score) {
+    return leaderboardEntries.filter(e => e.score >= score).length + 1;
+}
+
+function submitLeaderboardEntry(name, score, wave) {
+    return withTimeout(window.leaderboardService.submit({ name, score, wave }), LEADERBOARD_TIMEOUT_MS);
+}
+
+// Shows a just-submitted entry straight away, without waiting for another read
+function insertLeaderboardEntryLocally(entry) {
+    const index = leaderboardRankFor(entry.score) - 1;
+    leaderboardEntries.splice(index, 0, entry);
+    leaderboardEntries.length = Math.min(leaderboardEntries.length, LEADERBOARD_SIZE);
+    highlightedEntry = entry;
+    return index;
+}
+
+function showLeaderboardPageForRank(index) {
+    if (index >= 0 && index < leaderboardEntries.length) {
+        titleView.mode = 'leaderboard';
+        titleView.page = Math.floor(index / LEADERBOARD_ROWS_PER_PAGE);
+        titleView.timer = 0;
+    }
+}
+function leaderboardPageCount() {
+    return Math.ceil(leaderboardEntries.length / LEADERBOARD_ROWS_PER_PAGE);
+}
+
+function resetTitleView() {
+    titleView.mode = 'table';
+    titleView.page = 0;
+    titleView.timer = 0;
+}
+
+function updateTitleView(secondsPassed) {
+    if (leaderboardEntries.length === 0) {
+        resetTitleView();
+        return;
+    }
+
+    titleView.timer += secondsPassed;
+    if (titleView.mode === 'table') {
+        if (titleView.timer >= TITLE_TABLE_SECONDS) {
+            titleView.mode = 'leaderboard';
+            titleView.page = 0;
+            titleView.timer = 0;
+        }
+    } else if (titleView.timer >= LEADERBOARD_PAGE_SECONDS) {
+        titleView.timer = 0;
+        titleView.page++;
+        if (titleView.page >= leaderboardPageCount()) {
+            titleView.mode = 'table';
+            titleView.page = 0;
+        }
+    }
+}
+
+// Fade in/out so the swap between table and pages isn't abrupt
+function titleViewAlpha() {
+    if (leaderboardEntries.length === 0) {
+        return 1;
+    }
+    const duration = titleView.mode === 'table' ? TITLE_TABLE_SECONDS : LEADERBOARD_PAGE_SECONDS;
+    const fadeIn = Math.min(1, titleView.timer / TITLE_FADE_SECONDS);
+    const fadeOut = Math.min(1, (duration - titleView.timer) / TITLE_FADE_SECONDS);
+    return Math.max(0, Math.min(fadeIn, fadeOut));
+}
+
+function formatLeaderboardRow(rank, name, wave, score) {
+    return String(rank).padStart(2) + "  " +
+        name.padEnd(LEADERBOARD_NAME_LENGTH) + "  " +
+        String(wave).padStart(4) + "  " +
+        String(score).padStart(6);
+}
+
+function drawLeaderboardPage(ctx) {
+    ctx.font = "bold 30px Courier New";
+    ctx.fillStyle = "white";
+    drawCentredText(ctx, "TOP " + LEADERBOARD_SIZE + " PLAYERS", 300);
+
+    ctx.fillStyle = "#888888";
+    drawCentredText(ctx, formatLeaderboardRow("RK", "NAME", "WAVE", "SCORE"), 350);
+
+    const first = titleView.page * LEADERBOARD_ROWS_PER_PAGE;
+    const pageEntries = leaderboardEntries.slice(first, first + LEADERBOARD_ROWS_PER_PAGE);
+    pageEntries.forEach((entry, i) => {
+        const rank = first + i + 1;
+        const isMine = highlightedEntry !== null && entry.name === highlightedEntry.name &&
+            entry.score === highlightedEntry.score && entry.wave === highlightedEntry.wave;
+        ctx.fillStyle = isMine ? "#7CFC00" : (rank <= 3 ? "yellow" : "white");
+        drawCentredText(ctx, formatLeaderboardRow(rank, entry.name, entry.wave, entry.score), 395 + i * 31);
+    });
+}

@@ -28,7 +28,8 @@ function isTitleLinkTouchEvent(e) {
     if (!titleScreenLink || !e.target || !(e.target instanceof Element)) {
         return false;
     }
-    return e.target === titleScreenLink || e.target.closest('#titleScreenLink') !== null;
+    return e.target === titleScreenLink || e.target.closest('#titleScreenLink') !== null ||
+        e.target.closest('#nameEntry') !== null;
 }
 
 function setKey(key, state) {
@@ -664,6 +665,9 @@ let mouseX = 0;
 let gameOverTimer;
 let gameOverAnimateFrameTimer = 0.5; // seconds between flashing game over
 let gameOverDisplay = false;
+let finalScore = 0;
+let finalWave = 1;
+let nameEntryPending = false;
 let mouseY = 0;
 let mute = false;
 let gameState;
@@ -821,6 +825,8 @@ let newWaveTimer = 5;
 
 // #region gameLoad
 function gameLoad() {
+    loadLeaderboard();
+    resetTitleView();
     gameState = 0;
     shieldsOn = true;
     updateTitleScreenLinkVisibility();
@@ -835,7 +841,7 @@ function updateTitleScreenLinkLayout() {
     const canvasRect = canvas.getBoundingClientRect();
     const canvasScale = canvasRect.width / baseWidth;
     const linkX = baseWidth / 2;
-    const linkY = 885; // Just below the "tap or space to fire" title text at y=835.
+    const linkY = 885; // Just below the "tap or space to fire" title text at y=830.
 
     titleScreenLink.style.left = `${canvasRect.left + linkX * canvasScale}px`;
     titleScreenLink.style.top = `${canvasRect.top + linkY * canvasScale}px`;
@@ -858,6 +864,7 @@ function updateTitleScreenLinkVisibility() {
 function update(secondsPassed) {
 
     updateTitleScreenLinkVisibility();
+    updateNameEntryLayout();
 
     if (secondsPassed > 0.03) {
         secondsPassed = 0.03;
@@ -876,9 +883,11 @@ function update(secondsPassed) {
             checkMouseClickButtons();
             if ((keys.Space)) {
                 if (shortTimer < 0) {
+                    highlightedEntry = null;
                     newGame();
                 }
             }
+            updateTitleView(secondsPassed);
             titleAnimateTimer += secondsPassed;
             if (titleAnimateTimer > 0.5) {
                 titleAnimateTimer = 0;
@@ -1200,10 +1209,7 @@ function update(secondsPassed) {
             if (loseLifeTimer < 0) {
                 lives -= 1;
                 if (lives == 0) {
-                    gameState = 2;
-                    gameOverTimer = 15;
-                    gameOverAnimateFrameTimer = 0.5;
-                    shortTimer = 1;
+                    enterGameOver();
                 } else {
                     fleet.forEach(invader => {
                         invader.setMoving(true);
@@ -1219,10 +1225,7 @@ function update(secondsPassed) {
             checkMouseClickButtons();
             gameOverTimer -= (secondsPassed);
             if (gameOverTimer < 0) {
-                shortTimer = 1; // 2 second delay otherwise the key press will instantly start new game
-                currentLevel = 1;
-                resetGame();
-                gameState = 0;
+                leaveGameOver();
             }
             gameOverAnimateFrameTimer -= (secondsPassed);
             if (gameOverAnimateFrameTimer < 0) {
@@ -1236,13 +1239,14 @@ function update(secondsPassed) {
 
             if ((keys.Space)) {
                 if (shortTimer < 0) {
-                    shortTimer = 1; // 2 second delay otherwise the key press will instantly start new game
-                    currentLevel = 1;
-                    resetGame();
-                    gameState = 0;
+                    leaveGameOver();
                 }
 
             }
+            break;
+
+        case 3: // high score name entry
+            checkMouseClickButtons();
             break;
 
         default:
@@ -1268,11 +1272,17 @@ function draw() {
             context.font = "bold 30px Courier New";
             context.fillStyle = "white";
 
-            drawCentredText(context, "SCORE ADVANCE TABLE", 300);
-            drawCentredText(context, "= ? MYSTERY", 395);
-            drawCentredText(context, "= 30 POINTS", 440);
-            drawCentredText(context, "= 20 POINTS", 485);
-            drawCentredText(context, "= 10 POINTS", 530);
+            const showScoreTable = titleView.mode === 'table';
+            context.globalAlpha = titleViewAlpha();
+            if (showScoreTable) {
+                drawCentredText(context, "SCORE ADVANCE TABLE", 300);
+                drawCentredText(context, "= ? MYSTERY", 395);
+                drawCentredText(context, "= 30 POINTS", 440);
+                drawCentredText(context, "= 20 POINTS", 485);
+                drawCentredText(context, "= 10 POINTS", 530);
+            } else {
+                drawLeaderboardPage(context);
+            }
 
             titleFleet.forEach(invader => {
                 switch (invader.getType()) {
@@ -1290,18 +1300,23 @@ function draw() {
                         break;
                 }
 
-                invader.draw(context);
                 titleUfo.setX(260 + 10 * Math.sin(dx));
-                if (titleUfo.isActive() == true) {
-                    titleUfo.draw(context);
+                if (showScoreTable) {
+                    invader.draw(context);
+                    if (titleUfo.isActive() == true) {
+                        titleUfo.draw(context);
+                    }
                 }
             });
+            context.globalAlpha = 1;
 
-            context.drawImage(controls, 0, 0, 785, 363, baseWidth / 2 - 175, 650, 350, 162);
+            context.drawImage(controls, 0, 0, 785, 363, baseWidth / 2 - 140, 665, 280, 130);
             context.fillStyle = "white";
-            drawCentredText(context, "tap or space to fire", 835);
+            context.font = "bold 26px Courier New";
+            drawCentredText(context, "tap or space to fire", 830);
             context.fillStyle = "yellow";
-            drawCentredText(context, "a javaScript game by Neil Kendall 2025", baseHeight - 20);
+            context.font = "bold 30px Courier New";
+            drawCentredText(context, "A Retro Remake by Neil Kendall 2025-2026", baseHeight - 20);
             break;
         case 1:
             // drawBackGrid();
@@ -1513,6 +1528,9 @@ function draw() {
                 drawCentredText(context, text, baseHeight / 2 + 25); // 25px offset to visually center text in 100px rect
             }
 
+            break;
+        case 3:
+            drawNameEntry(context);
             break;
         default:
             break;
@@ -1766,7 +1784,7 @@ function updateAllInvadersPositions() {
         fleet.forEach(invader => {
             invader.setMoving("false");
         })
-        gameState = 2;
+        enterGameOver();
     }
 }
 
@@ -1901,6 +1919,43 @@ function removeDeadInvaders() {
         gameState = 1.2;
         newWaveTimer = 5;
     }
+}
+
+function enterGameOver() {
+    gameState = 2;
+    gameOverTimer = 15;
+    gameOverAnimateFrameTimer = 0.5;
+    shortTimer = 1; // delay otherwise a lingering key press would instantly leave game over
+    finalScore = score;
+    finalWave = currentLevel;
+    nameEntryPending = leaderboardQualifies(finalScore);
+
+    // Re-check against fresh data, since other players may have posted scores since the last read
+    if (window.leaderboardService && finalScore > 0) {
+        loadLeaderboard().then(refreshed => {
+            if (refreshed && gameState === 2) {
+                nameEntryPending = leaderboardQualifies(finalScore);
+            }
+        });
+    }
+}
+
+function leaveGameOver() {
+    if (nameEntryPending && leaderboardQualifies(finalScore)) {
+        nameEntryPending = false;
+        startNameEntry();
+    } else {
+        returnToTitle();
+    }
+}
+
+function returnToTitle() {
+    shortTimer = 1; // otherwise the key press that got us here will instantly start a new game
+    nameEntryPending = false;
+    currentLevel = 1;
+    resetGame();
+    resetTitleView();
+    gameState = 0;
 }
 
 function resetGame(currentLevel = 1) {

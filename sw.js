@@ -1,7 +1,7 @@
 // sw.js
 // Change the cache name when updating to cause cache refresh on progressive web apps
 
-const CACHE_NAME = 'space-invader-cache-Aug-30-2026';
+const CACHE_NAME = 'space-invader-cache-Oct-06-2026b';
 const FILES_TO_CACHE = [
   '/spaceinvaders/',
   '/spaceinvaders/index.html',
@@ -13,6 +13,10 @@ const FILES_TO_CACHE = [
   'Shield.js',
   'Missile.js',
   'Ufo.js',
+  'Leaderboard.js',
+  'NameEntry.js',
+  'ProfanityFilter.js',
+  'leaderboardService.js',
   'invaderIcon.png',
   'images/invaderLogo.png',
   'images/soundOff.png',
@@ -62,6 +66,11 @@ self.addEventListener('activate', event => {
 
 // Serve cached files or fetch from network
 self.addEventListener('fetch', event => {
+  // Let Firebase and other cross-origin or non-GET requests go straight to the network
+  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) {
+    return;
+  }
+
   // Always fetch fresh for HTML navigation requests
   if (event.request.mode === 'navigate') {
     event.respondWith(
