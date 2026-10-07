@@ -131,11 +131,11 @@ function updateTitleView(secondsPassed) {
     }
 }
 
-// Fade in/out so the swap between table and pages isn't abrupt
+// Fade in/out so the swap between table and pages isn't abrupt.
+// Note: while leaderboard data is still loading, titleView.timer is held at 0 (see
+// updateTitleView), so this naturally evaluates to 0 - the table stays hidden for that
+// brief moment rather than popping to full opacity and then dipping once data arrives.
 function titleViewAlpha() {
-    if (leaderboardEntries.length === 0) {
-        return 1;
-    }
     const duration = titleView.mode === 'table' ? TITLE_TABLE_SECONDS : LEADERBOARD_PAGE_SECONDS;
     const fadeIn = Math.min(1, titleView.timer / TITLE_FADE_SECONDS);
     const fadeOut = Math.min(1, (duration - titleView.timer) / TITLE_FADE_SECONDS);
