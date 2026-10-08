@@ -127,8 +127,9 @@ function handleTouchEnd(e) {
                 let tapX = (touch.clientX - rect.left) / scale;
                 let tapY = (touch.clientY - rect.top) / scale;
 
-                // Check mute button area
-                if (tapX > baseWidth / 2 - 25 && tapX < baseWidth / 2 + 25 && tapY > 915 && tapY < 973) {
+                // Check mute button area (hidden during name entry, gameState 3, where it would
+                // otherwise overlap the Submit/Skip buttons/D-pad)
+                if (gameState !== 3 && tapX > baseWidth / 2 - 25 && tapX < baseWidth / 2 + 25 && tapY > 915 && tapY < 973) {
                     toggleMute();
                 } else {
                     if (gameState === 1) {
@@ -1251,7 +1252,8 @@ function update(secondsPassed) {
             break;
 
         case 3: // high score name entry
-            checkMouseClickButtons();
+            // Mute button is hidden on this screen (see draw()), so don't check for clicks on it -
+            // it would otherwise sit underneath/overlap the name entry's Submit/Skip buttons.
             break;
 
         default:
@@ -1537,7 +1539,11 @@ function draw() {
             break;
 
     }
-    displaySound();
+    // Hidden during name entry (gameState 3): it would overlap the Submit/Skip buttons,
+    // and on touch devices the D-pad, drawn in that screen's HTML panel.
+    if (gameState !== 3) {
+        displaySound();
+    }
 }
 // #endregionred
 
