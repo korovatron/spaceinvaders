@@ -4,7 +4,8 @@
 const BLOCKED_ANYWHERE = [
     'fuck', 'shit', 'cunt', 'bitch', 'bastard', 'whore', 'slut', 'wank', 'twat', 'pussy',
     'nigg', 'faggot', 'retard', 'rapist', 'nazi', 'hitler', 'porn', 'penis', 'vagina', 'dildo',
-    'blowjob', 'handjob', 'cumshot', 'asshole', 'arsehole', 'dickhead', 'cocksuck', 'bollock'
+    'blowjob', 'handjob', 'cumshot', 'asshole', 'arsehole', 'dickhead', 'cocksuck', 'bollock',
+    'negro', 'negress'
 ];
 
 // Blocked only as a whole word, because they appear inside innocent words (class, Essex, peacock...)
