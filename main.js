@@ -451,7 +451,7 @@ window.onload = init;
 function init() {
     // #region Load Images
     let imagesLoaded = 0;
-    const numberImages = 4; // Set number of images to load
+    const numberImages = 5; // Set number of images to load
     invaderLogo.src = "images/invaderLogo.png";
     invaderLogo.onload = function () {
         imagesLoaded++;
@@ -475,6 +475,13 @@ function init() {
     }
     soundOn.src = "images/soundOn.png";
     soundOn.onload = function () {
+        imagesLoaded++;
+        if (imagesLoaded == numberImages) {
+            createCanvas();
+        }
+    }
+    gameOverImage.src = "images/gameOver.png";
+    gameOverImage.onload = function () {
         imagesLoaded++;
         if (imagesLoaded == numberImages) {
             createCanvas();
@@ -512,6 +519,7 @@ const invaderLogo = new Image(888, 390);
 const controls = new Image(785, 363);
 const soundOff = new Image(100, 117);
 const soundOn = new Image(100, 117);
+const gameOverImage = new Image(944, 215);
 // #endregion
 // Native canvas size (will scale with window size changes, but coordinate system remains at this)
 const baseWidth = 896;
@@ -1518,20 +1526,10 @@ function draw() {
             drawLivesScoreLevel();
 
             if (gameOverDisplay == true) {
-                const text = "GAME OVER";
-                context.font = "bold 75px Courier New";
-                const metrics = context.measureText(text);
-                const textWidth = metrics.width;
-                const rectWidth = textWidth + 40; // 20px padding left/right
-                const rectHeight = 80; // Fixed height for the rectangle
-                const rectX = (baseWidth / 2) - (rectWidth / 2);
-                const rectY = (baseHeight / 2) - (rectHeight / 2);
-                context.fillStyle = "yellow";
-                context.fillRect(rectX, rectY, rectWidth, rectHeight);
-
-                // Draw red text centered inside the rectangle
-                context.fillStyle = "red";
-                drawCentredText(context, text, baseHeight / 2 + 25); // 25px offset to visually center text in 100px rect
+                // gameOverImage is rendered at 2x resolution (944x215), so draw it at half size
+                const imgWidth = 944 / 2;
+                const imgHeight = 215 / 2;
+                context.drawImage(gameOverImage, baseWidth / 2 - imgWidth / 2, baseHeight / 2 - imgHeight / 2, imgWidth, imgHeight);
             }
 
             break;
