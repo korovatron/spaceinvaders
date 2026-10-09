@@ -426,6 +426,9 @@ let oldTimeStamp = 0;
 document.addEventListener("mousedown", function (e) {
     getMouseClickPosition(canvas, e);
 });
+document.addEventListener("mousemove", function (e) {
+    updateMuteButtonCursor(canvas, e);
+});
 
 // #endregion
 
@@ -1573,6 +1576,16 @@ function getMouseClickPosition(canvas, event) {
     mouseY = Math.round(y / scale);
 }
 
+// Shows a pointer cursor while the mouse hovers the mute button's hit area,
+// but only while the button is actually visible/clickable (see checkMouseClickButtons).
+function updateMuteButtonCursor(canvas, event) {
+    let rect = canvas.getBoundingClientRect();
+    let x = (event.clientX - rect.left) / scale;
+    let y = (event.clientY - rect.top) / scale;
+    const muteButtonActive = (gameState === 0 || gameState === 1 || gameState === 2) && isOverMuteButton(x, y);
+    canvas.style.cursor = muteButtonActive ? 'pointer' : 'default';
+}
+
 function getInvaderSprite(type, frame) {
     const typeMap = {
         'A': 'typeA',
@@ -1690,8 +1703,12 @@ function toggleMute() {
     mouseY = 0;
 }
 
+function isOverMuteButton(x, y) {
+    return x > baseWidth / 2 - 25 && x < baseWidth / 2 + 25 && y > 915 && y < 973;
+}
+
 function checkMouseClickButtons() {
-    if (mouseX > baseWidth / 2 - 25 && mouseX < baseWidth / 2 + 25 && mouseY > 915 && mouseY < 973) {
+    if (isOverMuteButton(mouseX, mouseY)) {
         toggleMute();
     }
 }
